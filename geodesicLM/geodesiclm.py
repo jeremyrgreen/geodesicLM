@@ -1,4 +1,5 @@
 import numpy
+from scipy.optimize import OptimizeResult
 from . import _geodesiclm
 
 
@@ -326,52 +327,49 @@ def geodesiclm(func, x0, **kwargs):
         Avv_extra_args=Avv_extra_args,
     )
 
-    if 'full_output' in kwargs:
-        full_output = kwargs['full_output']
-    else:
-        full_output = 0
+    if converged[0] == 1:
+        msg = 'artol'
+    elif converged[0] == 2:
+        msg = 'Cgoal'
+    elif converged[0] == 3:
+        msg = 'gtol'
+    elif converged[0] == 4:
+        msg = 'xtol'
+    elif converged[0] == 5:
+        msg = 'xrtol'
+    elif converged[0] == 6:
+        msg = 'ftol'
+    elif converged[0] == 7:
+        msg = 'frtol'
+    elif converged[0] == -1:
+        msg = 'iters'
+    elif converged[0] == -2:
+        msg = 'nfev'
+    elif converged[0] == -3:
+        msg = 'njev'
+    elif converged[0] == -4:
+        msg = 'naev'
+    elif converged[0] == -5:
+        msg = 'maxlam'
+    elif converged[0] == -6:
+        msg = 'minlam'
+    elif converged[0] == -10:
+        msg = 'user_termination'
+    elif converged[0] == -11:
+        msg = 'func_fail'
 
-    if full_output:
-        if converged[0] == 1:
-            msg = 'artol'
-        elif converged[0] == 2:
-            msg = 'Cgoal'
-        elif converged[0] == 3:
-            msg = 'gtol'
-        elif converged[0] == 4:
-            msg = 'xtol'
-        elif converged[0] == 5:
-            msg = 'xrtol'
-        elif converged[0] == 6:
-            msg = 'ftol'
-        elif converged[0] == 7:
-            msg = 'frtol'
-        elif converged[0] == -1:
-            msg = 'iters'
-        elif converged[0] == -2:
-            msg = 'nfev'
-        elif converged[0] == -3:
-            msg = 'njev'
-        elif converged[0] == -4:
-            msg = 'naev'
-        elif converged[0] == -5:
-            msg = 'maxlam'
-        elif converged[0] == -6:
-            msg = 'minlam'
-        elif converged[0] == -10:
-            msg = 'user_termination'
-        elif converged[0] == -11:
-            msg = 'func_fail'
-        info = {
-            'converged': converged[0],
-            'iters': numpy.array([niters[0], nfev[0], njev[0], naev[0]]),
-            'msg': msg,
-            'fvec': fvec,
-            'fjac': fjac,
-        }
-        return x, info
-    else:
-        return x
+    rslt = OptimizeResult()
+    rslt.x = x
+    rslt.message = msg
+    rslt.success = converged[0]
+    rslt.nfev = nfev[0]
+    rslt.njev = njev[0]
+    rslt.naev = naev[0]
+    rslt.nit = niters[0]
+    rslt.fvec = fvec
+    rslt.fjac = fjac
+
+    return rslt
 
 
 def jacobian_dummy(x, *args):
